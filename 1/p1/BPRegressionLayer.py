@@ -20,6 +20,7 @@ class BPLayer(object):
 
     def forward(self, raw_input):
         assert raw_input.shape == self.input_data.shape, " ** BPLayer input size ERROR!\n"
+        
         self.input_data = raw_input
         self.sum_data = self.weight.T.dot(self.input_data) + self.bias # Wx+b
         
