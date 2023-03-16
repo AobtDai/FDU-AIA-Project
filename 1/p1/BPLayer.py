@@ -1,0 +1,54 @@
+r""" this file is to define the basic BP Layer 
+    including foward and backward """
+
+import numpy as np
+from MyUtils import sigmoid, sigmoid_derivation
+
+
+class BPLayer(object):
+    def __init__(self, input_size, output_size, random_range=0.15, last_flag=False):
+        self.input_data = np.zeros((input_size, 1))
+        self.bias = np.random.normal(loc=0.0, scale=random_range, size=(output_size, 1))
+        self.weight = np.random.normal(loc=0.0, scale=random_range, size=(input_size, output_size))
+        self.sum_data = np.zeros((output_size, 1)) # before activation
+        self.output_data = np.zeros_like(self.sum_data)
+        
+        self.delta_batch_weight = np.zeros_like(self.weight)
+        self.delta_batch_bias = np.zeros_like(self.bias)
+        self.batch_num = 0 # an iter in one batch
+        self.last_flag =last_flag
+
+    def forward(self, raw_input):
+        assert raw_input.shape == self.input_data.shape, " ** BPLayer input size ERROR!\n"
+        self.input_data = raw_input
+        self.sum_data = self.weight.T.dot(self.input_data) + self.bias # Wx+b
+        
+        if self.last_flag:
+            self.output_data = self.sum_data
+        else:
+            self.output_data = sigmoid(self.sum_data)
+        return self.output_data
+
+    def backward(self, loss):
+        public_delta = loss * sigmoid_derivation(self.sum_data)
+        # weight_gradient = public_delta.dot(self.input_data)
+        weight_gradient = self.input_data.dot(public_delta.T)
+        bias_gradient = public_delta
+        
+        self.delta_batch_weight -= weight_gradient
+        self.delta_batch_bias -= bias_gradient
+        self.batch_num += 1
+        backward_loss = self.weight.dot(public_delta)
+
+        return backward_loss
+    
+    def update_weight(self, lr):
+        delta_weight = lr * self.delta_batch_weight / self.batch_num
+        delta_bias = lr * self.delta_batch_bias / self.batch_num
+        self.weight += delta_weight
+        self.bias += delta_bias
+
+        self.batch_num = 0
+        self.delta_batch_weight = np.zeros_like(self.weight)
+        self.delta_batch_bias = np.zeros_like(self.bias)
+        
