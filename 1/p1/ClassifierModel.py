@@ -7,7 +7,7 @@ from BPClassifierLayer import BPLayer
 
 
 class ClassifierNet(object):
-    def __init__(self, layer_arch=[28*28,64,64,12], lr=0.01, random_range=0.15, 
+    def __init__(self, layer_arch=[28*28,128,64,12], lr=0.01, random_range=0.15, 
                  train_data_size=8000, batch_size=20):
         assert len(layer_arch) >= 2, " ** Error!! 2 layers are needed at least!\n"
 
@@ -16,7 +16,7 @@ class ClassifierNet(object):
         self.random_range = random_range
         self.train_data_size = train_data_size
         # self.train_data = np.linspace(-math.pi, math.pi, train_data_size) # generate data
-        self.train_data = ?
+        self.train_data = []
         self.eval_data = []
         self.batch_size = batch_size
 

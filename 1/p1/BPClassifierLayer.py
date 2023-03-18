@@ -19,7 +19,9 @@ class BPLayer(object):
         self.last_flag =last_flag
 
     def forward(self, raw_input):
-        assert raw_input.shape == self.input_data.shape, " ** BPLayer input size ERROR!\n"
+        # if raw_input.shape != self.input_data.shape:
+        #     print(raw_input.shape, self.input_data.shape)
+        assert raw_input.shape == self.input_data.shape, " ** BPLayer input size ERROR! \n"
         
         self.input_data = raw_input
         self.sum_data = self.weight.T.dot(self.input_data) + self.bias # Wx+b
@@ -33,8 +35,10 @@ class BPLayer(object):
         return self.output_data
 
     def backward(self, loss):
-        public_delta = loss 
-        # weight_gradient = public_delta.dot(self.input_data)
+        if self.last_flag: 
+            public_delta = loss # softmax
+        else:
+            public_delta = loss * sigmoid_derivation(self.sum_data) 
         weight_gradient = self.input_data.dot(public_delta.T)
         bias_gradient = public_delta
         
