@@ -8,7 +8,7 @@ from BPLayer import BPLayer
 
 class ClassifierNet(object):
     def __init__(self, layer_arch=[28*28,128,64,12], lr=0.01, random_range=0.15, 
-                 train_data_size=8000, batch_size=20, task_kind="Classify"):
+                 train_data_size=8000, batch_size=20, task_kind="Classifier"):
         assert len(layer_arch) >= 2, " ** Error!! 2 layers are needed at least!\n"
 
         self.layer_arch = layer_arch

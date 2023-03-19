@@ -3,7 +3,6 @@ r"""博1bo  学2xue  笃3du  志4zhi,
     切5qie 问6wen  近7jin 思8si, 
     自9zi  由10you 无11wu 用12yong """
 
-
 import math
 import random
 import matplotlib.pyplot as plt
@@ -11,11 +10,29 @@ import numpy as np
 from ClassifierModel import ClassifierNet
 from MyDataset import MyDataset
 from torch.utils.data import DataLoader
+import argparse
+import yaml
+from easydict import EasyDict
 
-anno_train_path = "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/anno_store/anno_train.txt"
-anno_val_path = "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/anno_store/anno_val.txt"
-class_num = 12
-batch_size = 20
+
+parser = argparse.ArgumentParser(description='Classifier Task')
+parser.add_argument("--config_path", type=str, default="config.yaml")
+args = parser.parse_args()
+config_path =args.config_path
+config = yaml.load(open(config_path, 'r'), Loader=yaml.Loader)
+config = EasyDict(config)
+task_kind = "Classifier"
+config = config[task_kind]
+
+anno_train_path = config["Train"]["annotation_path"]
+anno_val_path = config["Val"]["annotation_path"]
+class_num = config["General"]["class_num"]
+batch_size = config["Train"]["batch_size"]
+epochs = config["Train"]["epochs"]
+layer_arch = config["Train"]["layer_arch"]
+lr = config["Train"]["lr"]
+random_range = config["Train"]["init_generation_random_range"]
+
 
 def eval(model, if_draw=False):
     eval_dataset = MyDataset(annotation_path = anno_val_path,
@@ -29,7 +46,6 @@ def eval(model, if_draw=False):
     for i, batch in enumerate(eval_loader):
         img_tensor, label_tensor = batch # torch.tensor
         for j in range(0, min(len(label_tensor), batch_size)):
-            # print(" >>>>>> ", img_tensor.shape, label_tensor.shape)
             img, label = img_tensor[j], label_tensor[j]
             img = img.numpy()
             pred = model.forward(img)
@@ -37,6 +53,7 @@ def eval(model, if_draw=False):
             if pred_label==label:
                 acc_num+=1
             total_loss -= np.log(pred[label-1][0])
+
     acc_rate = acc_num / len(eval_dataset)
     avg_loss = total_loss / len(eval_dataset)
     print("eval_accuracy, %.2f total loss in %d data size" 
@@ -46,10 +63,11 @@ def eval(model, if_draw=False):
 
 
 if __name__ == "__main__":
-    BPClassifier = ClassifierNet(layer_arch = [28*28,64,64,12], 
-                                 lr = 0.01, 
+    BPClassifier = ClassifierNet(layer_arch = layer_arch, 
+                                 lr = lr, 
+                                 random_range = random_range,
                                  batch_size = batch_size,
-                                 task_kind="Classify")
+                                 task_kind = task_kind)
     
     train_dataset = MyDataset(annotation_path = anno_train_path,
                               class_num = class_num, )
@@ -66,21 +84,21 @@ if __name__ == "__main__":
     avg_loss_record_y.append(avg_loss_y)
     acc_rate_record_y.append(acc_rate_y)
 
-    for epoch in range(0,401):
+    for epoch in range(0, epochs+1):
         for i, batch in enumerate(train_loader):
             img_tensor, label_tensor = batch # torch.tensor
             for j in range(0, batch_size):
                 img, label = img_tensor[j], label_tensor[j]
                 img = img.numpy()
                 pred = BPClassifier.forward(img)
-                gt_one_hot = [0]*12
+                gt_one_hot = [0]*class_num
                 gt_one_hot[label-1] = 1
-                gt_one_hot = np.array(gt_one_hot).reshape((12,1))
+                gt_one_hot = np.array(gt_one_hot).reshape((class_num,1))
                 loss = pred - gt_one_hot
                 BPClassifier.backward(loss)
             BPClassifier.update_weight(BPClassifier.lr)
         
-        if epoch % 20 == 0:
+        if epoch % 10 == 0:
             print("Epoch" , epoch)
             if_draw = False
             epoch_record_x.append(epoch)

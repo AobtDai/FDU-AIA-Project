@@ -5,6 +5,27 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 from RegressModel import RegressionNet
+import argparse
+import yaml
+from easydict import EasyDict
+
+
+parser = argparse.ArgumentParser(description='Regression Task')
+parser.add_argument("--config_path", type=str, default="config.yaml")
+args = parser.parse_args()
+config_path =args.config_path
+config = yaml.load(open(config_path, 'r'), Loader=yaml.Loader)
+config = EasyDict(config)
+task_kind = "Regression"
+config = config[task_kind]
+
+train_data_size = config["Train"]["data_size"]
+eval_data_size = config["Val"]["data_size"]
+batch_size = config["Train"]["batch_size"]
+epochs = config["Train"]["epochs"]
+layer_arch = config["Train"]["layer_arch"]
+lr = config["Train"]["lr"]
+random_range = config["Train"]["init_generation_random_range"]
 
 
 def eval(model, eval_data_size=500, if_draw=False):
@@ -39,17 +60,19 @@ def eval(model, eval_data_size=500, if_draw=False):
 
 
 if __name__ == "__main__":
-    BPsin = RegressionNet(layer_arch=[1,64,64,1], 
-                          lr=0.01, 
-                          batch_size=20,
-                          task_kind="Regression")
+    BPsin = RegressionNet(layer_arch = layer_arch, 
+                          lr = lr, 
+                          train_data_size = train_data_size,
+                          random_range = random_range,
+                          batch_size = batch_size,
+                          task_kind = task_kind)
 
     epoch_record_x = []
     avg_loss_record_y = []
     epoch_record_x.append(0)
-    avg_loss_record_y.append(eval(BPsin, eval_data_size=500, if_draw=False))
+    avg_loss_record_y.append(eval(BPsin, eval_data_size=eval_data_size, if_draw=False))
 
-    for epoch in range(0,10001):
+    for epoch in range(0, epochs+1):
 
         np.random.shuffle(BPsin.train_data)
         gt_result = np.sin(BPsin.train_data)
@@ -72,7 +95,7 @@ if __name__ == "__main__":
             # if epoch == 10000:
             #     if_draw = True
             epoch_record_x.append(epoch)
-            avg_loss_record_y.append(eval(BPsin, eval_data_size=500, if_draw=if_draw))
+            avg_loss_record_y.append(eval(BPsin, eval_data_size=eval_data_size, if_draw=if_draw))
     
     plt.plot(epoch_record_x, avg_loss_record_y)
     plt.title("Loss with epoch")
