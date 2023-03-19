@@ -48,9 +48,12 @@ def eval(model, if_draw=False):
 if __name__ == "__main__":
     BPClassifier = ClassifierNet(layer_arch = [28*28,64,64,12], 
                                  lr = 0.01, 
-                                 batch_size = batch_size)
+                                 batch_size = batch_size,
+                                 task_kind="Classify")
+    
     train_dataset = MyDataset(annotation_path = anno_train_path,
                               class_num = class_num, )
+    
     train_loader = DataLoader(dataset = train_dataset, 
                               shuffle = True, 
                               batch_size = batch_size,
@@ -63,7 +66,7 @@ if __name__ == "__main__":
     avg_loss_record_y.append(avg_loss_y)
     acc_rate_record_y.append(acc_rate_y)
 
-    for epoch in range(0,3001):
+    for epoch in range(0,401):
         for i, batch in enumerate(train_loader):
             img_tensor, label_tensor = batch # torch.tensor
             for j in range(0, batch_size):
@@ -74,13 +77,10 @@ if __name__ == "__main__":
                 gt_one_hot[label-1] = 1
                 gt_one_hot = np.array(gt_one_hot).reshape((12,1))
                 loss = pred - gt_one_hot
-                # print("loss Shape: ",loss.shape)
-                # print("pred Shape: ",pred.shape)
-                # print("gt Shape: ",gt_one_hot.shape)
                 BPClassifier.backward(loss)
             BPClassifier.update_weight(BPClassifier.lr)
         
-        if epoch % 100 == 0:
+        if epoch % 20 == 0:
             print("Epoch" , epoch)
             if_draw = False
             epoch_record_x.append(epoch)

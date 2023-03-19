@@ -39,12 +39,15 @@ def eval(model, eval_data_size=500, if_draw=False):
 
 
 if __name__ == "__main__":
-    BPsin = RegressionNet(layer_arch=[1,64,64,1], lr=0.01, batch_size=20)
+    BPsin = RegressionNet(layer_arch=[1,64,64,1], 
+                          lr=0.01, 
+                          batch_size=20,
+                          task_kind="Regression")
 
     epoch_record_x = []
     avg_loss_record_y = []
     epoch_record_x.append(0)
-    avg_loss_record_y.append(eval(BPsin, eval_data_size=500, if_draw=True))
+    avg_loss_record_y.append(eval(BPsin, eval_data_size=500, if_draw=False))
 
     for epoch in range(0,10001):
 
@@ -66,8 +69,8 @@ if __name__ == "__main__":
             if_draw = False
             # if epoch % 1000 == 0:
             #     if_draw = True
-            if epoch == 10000:
-                if_draw = True
+            # if epoch == 10000:
+            #     if_draw = True
             epoch_record_x.append(epoch)
             avg_loss_record_y.append(eval(BPsin, eval_data_size=500, if_draw=if_draw))
     

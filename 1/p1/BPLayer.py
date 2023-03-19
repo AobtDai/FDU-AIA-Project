@@ -2,11 +2,12 @@ r""" this file is to define the basic BP Layer
     including foward and backward """
 
 import numpy as np
-from MyUtils import sigmoid, sigmoid_derivation
+from MyUtils import sigmoid, sigmoid_derivation, softmax
 
 
 class BPLayer(object):
-    def __init__(self, input_size, output_size, random_range=0.15, last_flag=False):
+    def __init__(self, input_size, output_size, random_range=0.15, 
+                 last_flag=False, task_kind="Classify"):
         self.input_data = np.zeros((input_size, 1))
         self.bias = np.random.normal(loc=0.0, scale=random_range, size=(output_size, 1))
         self.weight = np.random.normal(loc=0.0, scale=random_range, size=(input_size, output_size))
@@ -17,22 +18,31 @@ class BPLayer(object):
         self.delta_batch_bias = np.zeros_like(self.bias)
         self.batch_num = 0 # an iter in one batch
         self.last_flag =last_flag
+        assert task_kind=="Classify" or task_kind=="Regression", \
+            " ** Task Kind Error! You could only choose one from Classify and Regression"
+        self.tast_kind = task_kind
 
     def forward(self, raw_input):
-        assert raw_input.shape == self.input_data.shape, " ** BPLayer input size ERROR!\n"
+        assert raw_input.shape == self.input_data.shape, " ** BPLayer input size ERROR! \n"
         
         self.input_data = raw_input
         self.sum_data = self.weight.T.dot(self.input_data) + self.bias # Wx+b
         
         if self.last_flag:
-            self.output_data = self.sum_data
+            if self.tast_kind == "Classify":
+                self.output_data = softmax(self.sum_data) # logits
+            else : # Regression
+                self.output_data = self.sum_data
         else:
             self.output_data = sigmoid(self.sum_data)
         return self.output_data
 
     def backward(self, loss):
-        public_delta = loss * sigmoid_derivation(self.sum_data)
-        # weight_gradient = public_delta.dot(self.input_data)
+        if self.last_flag and self.tast_kind == "Classify":
+            public_delta = loss # softmax
+        else:
+            public_delta = loss * sigmoid_derivation(self.sum_data) 
+            
         weight_gradient = self.input_data.dot(public_delta.T)
         bias_gradient = public_delta
         
