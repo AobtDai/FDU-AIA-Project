@@ -19,6 +19,8 @@ Classifier:
     lr: 0.01
     init_generation_random_range: 0.15
     annotation_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/anno_store/anno_train.txt"
+    is_load: True
+    load_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/model_store/"
 
   Val:  
     annotation_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/anno_store/anno_val.txt"

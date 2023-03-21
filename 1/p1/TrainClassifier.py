@@ -32,9 +32,11 @@ epochs = config["Train"]["epochs"]
 layer_arch = config["Train"]["layer_arch"]
 lr = config["Train"]["lr"]
 random_range = config["Train"]["init_generation_random_range"]
+is_load = config["Train"]["is_load"]
+load_path = config["Train"]["load_path"]
 
 
-def eval(model, if_draw=False):
+def eval(model):
     eval_dataset = MyDataset(annotation_path = anno_val_path,
                               class_num = class_num, )
     eval_loader = DataLoader(dataset = eval_dataset, 
@@ -58,16 +60,19 @@ def eval(model, if_draw=False):
     avg_loss = total_loss / len(eval_dataset)
     print("eval_accuracy, %.2f total loss in %d data size" 
           % (total_loss, len(eval_dataset)))
-    print("Avg_loss is %.2f, with acc_rate %.4f \n" % (avg_loss, acc_rate))
+    print("Avg_loss is %.2f, with acc_rate %.2f%% \n" % (avg_loss, (acc_rate*100)))
     return avg_loss, acc_rate
 
 
 if __name__ == "__main__":
+    
     BPClassifier = ClassifierNet(layer_arch = layer_arch, 
                                  lr = lr, 
                                  random_range = random_range,
                                  batch_size = batch_size,
-                                 task_kind = task_kind)
+                                 task_kind = task_kind,
+                                 is_load = is_load,
+                                 load_path = load_path)
     
     train_dataset = MyDataset(annotation_path = anno_train_path,
                               class_num = class_num, )
@@ -76,6 +81,7 @@ if __name__ == "__main__":
                               shuffle = True, 
                               batch_size = batch_size,
                               drop_last = True)
+    best_acc = 0.86
     epoch_record_x = []
     avg_loss_record_y = []
     acc_rate_record_y = []
@@ -103,6 +109,11 @@ if __name__ == "__main__":
             if_draw = False
             epoch_record_x.append(epoch)
             avg_loss_y, acc_rate_y = eval(BPClassifier)
+            
+            if best_acc < acc_rate_y:
+                BPClassifier.save_model()
+                best_acc = acc_rate_y
+
             avg_loss_record_y.append(avg_loss_y)
             acc_rate_record_y.append(acc_rate_y)
     

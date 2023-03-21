@@ -62,4 +62,16 @@ class BPLayer(object):
         self.batch_num = 0
         self.delta_batch_weight = np.zeros_like(self.weight)
         self.delta_batch_bias = np.zeros_like(self.bias)
+    
+    def get_weight(self):
+        return self.weight
+    
+    def get_bias(self):
+        return self.bias
+    
+    def init_weight(self, w):
+        self.weight = w
+
+    def init_bias(self, b):
+        self.bias = b
         
