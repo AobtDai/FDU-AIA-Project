@@ -4,9 +4,9 @@ r"""博1bo  学2xue  笃3du  志4zhi,
     自9zi  由10you 无11wu 用12yong """
 
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import torch.nn as nn
+import torch.optim as optim
 from CNNModel import CNNModel
 from MyDataset import MyDataset
 from torch.utils.data import DataLoader
@@ -65,18 +65,17 @@ def eval(model):
 if __name__ == "__main__":
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # device = torch.device("cpu")
     model = CNNModel()
     model.to(device)
     loss_function = nn.CrossEntropyLoss() # including softmax
+    optimizer = optim.Adam(model.parameters(), lr = lr)
     train_dataset = MyDataset(annotation_path = anno_train_path,
                               class_num = class_num, )
     train_loader = DataLoader(dataset = train_dataset, 
                               shuffle = True, 
                               batch_size = batch_size,
                               drop_last = True)
-    best_acc = 0.0
-    # best_acc = 0.874
+    best_acc = 0.96
     epoch_record_x = []
     # avg_loss_record_y = []
     acc_rate_record_y = []
@@ -97,7 +96,9 @@ if __name__ == "__main__":
             # print("dim=0: ", torch.argmax(pred_tensor[0]).item())
             # print("dim=1: ", torch.argmax(pred_tensor[0],dim=1))
             loss = loss_function(pred_tensor, label_tensor.to(device))
+            optimizer.zero_grad()
             loss.backward()
+            optimizer.step()
         
         if epoch % 10 == 0:
             print("Epoch" , epoch)
@@ -111,6 +112,12 @@ if __name__ == "__main__":
 
             # avg_loss_record_y.append(avg_loss_y)
             acc_rate_record_y.append(acc_rate_y)
+        
+        # if epoch in [4,6]:
+        #     print("Reduce LR")
+        #     lr = optimizer.param_groups[0]['lr']
+        #     for param_group in optimizer.param_groups:
+        #         param_group['lr'] = lr/2
     
     # plt.plot(epoch_record_x, avg_loss_record_y,
     #             color="red", label="avg_loss_record")

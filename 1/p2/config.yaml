@@ -2,7 +2,7 @@ CNN:
   Train:
     batch_size: 30
     epochs: 100
-    lr: 0.01
+    lr: 0.001
     annotation_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p2/anno_store/anno_train.txt"
     is_load: False
     load_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p2/model_store/"
