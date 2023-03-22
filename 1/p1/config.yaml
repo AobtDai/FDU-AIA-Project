@@ -2,7 +2,7 @@ Regression:
   Train:
     batch_size: 20
     epochs: 10000
-    layer_arch: [1,64,64,1]
+    layer_arch: [1,32,64,64,1]
     lr: 0.01
     data_size: 8000
     init_generation_random_range: 0.15
@@ -14,12 +14,12 @@ Regression:
 Classifier:
   Train:
     batch_size: 20
-    epochs: 400
+    epochs: 300
     layer_arch: [784,128,64,12]
     lr: 0.01
     init_generation_random_range: 0.15
     annotation_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/anno_store/anno_train.txt"
-    is_load: True
+    is_load: False
     load_path: "C:/Users/25705/Downloads/documents/fdu/1.6/AI/PJ/1/p1/model_store/"
 
   Val:  
