@@ -43,21 +43,16 @@ def eval(model):
                               batch_size = batch_size,
                               drop_last = False)
     acc_num = 0
-    # total_loss = 0
     for i, batch in enumerate(eval_loader):
         img_tensor, label_tensor = batch # torch.tensor
         with torch.no_grad():
             pred_tensor = model(img_tensor.to(device))
             for j in range(pred_tensor.size(0)):
                 pred = torch.argmax(pred_tensor[j]).item()
-                # label = torch.argmax(label_tensor[j]).item()
                 if pred==label_tensor[j]:
                     acc_num+=1
 
     acc_rate = acc_num / len(eval_dataset)
-    # avg_loss = total_loss / len(eval_dataset)
-    # print("eval_accuracy, %.2f total loss in %d data size" 
-        #   % (total_loss, len(eval_dataset)))
     print("Acc_rate %.2f%% \n" % (acc_rate*100))
     return acc_rate
 
@@ -75,52 +70,41 @@ if __name__ == "__main__":
                               shuffle = True, 
                               batch_size = batch_size,
                               drop_last = True)
-    best_acc = 0.96
+    best_acc = 0.9866
     epoch_record_x = []
-    # avg_loss_record_y = []
     acc_rate_record_y = []
     epoch_record_x.append(0)
     acc_rate_y = eval(model)
-    # avg_loss_record_y.append(avg_loss_y)
     acc_rate_record_y.append(acc_rate_y)
 
     for epoch in range(0, epochs+1):
         for i, batch in enumerate(train_loader):
             img_tensor, label_tensor = batch # torch.tensor
-            # print("img&label size: {}, {}"
-            #       .format(img_tensor.shape, label_tensor.shape))
             pred_tensor = model(img_tensor.to(device))
-            # print("pred size: {}".format(pred_tensor.shape))
-            # print(pred_tensor[0])
-            # print("dim=0: ", torch.argmax(pred_tensor[0]))
-            # print("dim=0: ", torch.argmax(pred_tensor[0]).item())
-            # print("dim=1: ", torch.argmax(pred_tensor[0],dim=1))
             loss = loss_function(pred_tensor, label_tensor.to(device))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
         
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             print("Epoch" , epoch)
             epoch_record_x.append(epoch)
             acc_rate_y = eval(model)
             
             if best_acc < acc_rate_y:
-                print(" -------< Saving Best Model >------- \n")
+                print(" -------< Saved Best Model >------- \n")
                 torch.save(model.state_dict(), save_path)
                 best_acc = acc_rate_y
 
-            # avg_loss_record_y.append(avg_loss_y)
             acc_rate_record_y.append(acc_rate_y)
+
+            if epoch in [30,50]:
+                lr = optimizer.param_groups[0]['lr']
+                print(" -------< Reducing lr to {} >------- \n".format(lr/2))
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = lr/2
         
-        # if epoch in [4,6]:
-        #     print("Reduce LR")
-        #     lr = optimizer.param_groups[0]['lr']
-        #     for param_group in optimizer.param_groups:
-        #         param_group['lr'] = lr/2
     
-    # plt.plot(epoch_record_x, avg_loss_record_y,
-    #             color="red", label="avg_loss_record")
     plt.plot(epoch_record_x, acc_rate_record_y, 
                 color="green", label="acc_rate_record")
     plt.title("Loss with epoch")
