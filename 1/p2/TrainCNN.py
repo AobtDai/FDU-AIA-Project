@@ -62,6 +62,12 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = CNNModel()
     model.to(device)
+
+    if is_load:
+        print(" -------< Loading parameters from {} >------- \n".format(load_path))
+        params = torch.load(load_path, map_location='cuda:0')
+        model.load_state_dict(params, strict=True) 
+
     loss_function = nn.CrossEntropyLoss() # including softmax
     optimizer = optim.Adam(model.parameters(), lr = lr)
     train_dataset = MyDataset(annotation_path = anno_train_path,
