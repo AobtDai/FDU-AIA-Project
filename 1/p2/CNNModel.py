@@ -38,9 +38,9 @@ class CNNModel(nn.Module):
 
             nn.Flatten(),
             nn.Linear(16*6*6, 120),
-            nn.Sigmoid(),
+            nn.ReLU(),
             nn.Linear(120, 84),
-            nn.Sigmoid(),
+            nn.ReLU(),
             nn.Linear(84, 12),
         )
 
