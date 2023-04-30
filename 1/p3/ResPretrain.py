@@ -8,9 +8,10 @@ from torch.utils.data import DataLoader
 import argparse
 import yaml
 from easydict import EasyDict
+import time
 
 
-parser = argparse.ArgumentParser(description='VGG11 Pretrain')
+parser = argparse.ArgumentParser(description='Res18 Pretrain')
 parser.add_argument("--config_path", type=str, default="config.yaml")
 args = parser.parse_args()
 config_path =args.config_path
@@ -55,10 +56,11 @@ def build_model():
     res18 = models.resnet18(pretrained=True)
     res18.fc = nn.Linear(512, 10)
     # nn.init.xavier_uniform_(res18.fc.weight)
+    
     # freezing:
     for name, child in res18.named_children():
-        # if name in ['layer4','avgpool','fc']:
-        if name in ['avgpool','fc']:
+        if name in ['layer4','avgpool','fc']:
+        # if name in ['avgpool','fc']:
             for param in child.parameters():
                 param.requires_grad = True
         else:
@@ -102,6 +104,7 @@ if __name__ == "__main__":
     loss_function = nn.CrossEntropyLoss()
 
     best_acc = 0.
+    t0 = time.time()
     for epoch in range(1, epochs):
         for i, batch in enumerate(train_loader):
             img_tensor, label_tensor = batch
@@ -116,3 +119,6 @@ if __name__ == "__main__":
                 % (epoch, epochs, loss, acc_rate*100))
         if acc_rate > best_acc:
             torch.save(model.state_dict(), save_path)
+        t1 = time.time()
+        print("Epoch time cost: ",t1 - t0)
+        t0 = t1

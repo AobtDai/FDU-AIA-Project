@@ -35,6 +35,7 @@ save_path = config["Train"]["save_path"]
 
 
 def eval(model):
+    # model.eval()
     print(" -------< Evaluating >------- \n")
     eval_dataset = MyDataset(annotation_path = anno_val_path,
                               class_num = class_num, )
@@ -70,13 +71,14 @@ if __name__ == "__main__":
 
     loss_function = nn.CrossEntropyLoss() # including softmax
     optimizer = optim.Adam(model.parameters(), lr = lr)
+    # optimizer = optim.RMSprop(model.parameters(), lr = lr)
     train_dataset = MyDataset(annotation_path = anno_train_path,
                               class_num = class_num, )
     train_loader = DataLoader(dataset = train_dataset, 
                               shuffle = True, 
                               batch_size = batch_size,
                               drop_last = True)
-    best_acc = 0.9866
+    best_acc = 0.9839
     epoch_record_x = []
     acc_rate_record_y = []
     epoch_record_x.append(0)
