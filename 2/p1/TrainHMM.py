@@ -59,7 +59,8 @@ def GetData(path):
 
 
 class HMMModel():
-    def __init__(self, word_dict, tag_dict, train_words, train_tags, val_words, val_tags):
+    # def __init__(self, word_dict, tag_dict, train_words, train_tags, val_words, val_tags):
+    def __init__(self, word_dict, tag_dict, train_words, train_tags):
         self.word_dict = word_dict
         self.tag_dict = tag_dict
         self.tot_words = train_words
@@ -80,18 +81,7 @@ class HMMModel():
                 else :
                     next_tag = tags[j+1]
                     self.trans[tag_dict[tag]][tag_dict[next_tag]] += 1
-        for i, tags in enumerate(val_tags):
-            for j, tag in enumerate(tags):
-                obser_word = val_words[i][j]
-                self.emits[tag_dict[tag]][word_dict[obser_word]] += 1
-                if j==0:
-                    self.piinit[tag_dict[tag]] += 1
-                if j==len(tags)-1:
-                    pass
-                else :
-                    next_tag = tags[j+1]
-                    self.trans[tag_dict[tag]][tag_dict[next_tag]] += 1
-        
+
         self.piinit = self.piinit / self.piinit.sum()
         # self.piinit = self.piinit**2 ###
         # self.piinit = self.piinit / self.piinit.sum()###
@@ -128,7 +118,7 @@ class HMMModel():
             states = np.zeros(len(words))    
             prob[0] = self.piinit + self.emits[:, self.word_dict[words[0]]]
             for j in range(1, len(words)):
-                max_p = prob[j-1] + self.trans
+                max_p = prob[j-1] + self.trans.T
                 arg_max_p[j] = np.argmax(max_p, axis=1)
                 # print(type(arg_max_p[j][0]))
                 prob[j] = [max_p[k, int(arg_max_p[j][k])] for k in range(max_p.shape[0])]
@@ -156,8 +146,8 @@ if __name__ == "__main__":
     train_words, train_tags = GetData(train_path)
     val_words, val_tags = GetData(val_path)
 
-    HMM = HMMModel(word_dict, tag_dict, train_words, train_tags, val_words, val_tags)
-    # HMM = HMMModel(word_dict, tag_dict, train_words, train_tags)
+    # HMM = HMMModel(word_dict, tag_dict, train_words, train_tags, val_words, val_tags)
+    HMM = HMMModel(word_dict, tag_dict, train_words, train_tags)
     HMM.val_fn(val_words, out_path)
 
 

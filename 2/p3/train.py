@@ -79,7 +79,7 @@ def eval(model, word_dict, tag_dict):
     all_label = list(chain.from_iterable(all_label))
     all_pred = list(chain.from_iterable(all_pred))
     sort_labels = [k for k in train_dataset.tag_dict.keys()]
-    f1 = metrics.f1_score(all_label, all_pred, average='micro', labels=sort_labels[:-3], zero_division=1)
+    f1 = metrics.f1_score(all_label, all_pred, average='micro', labels=sort_labels[1:-3], zero_division=1)
     # print(metrics.classification_report(all_label, all_pred, labels=sort_labels[:-3], digits=3))
     print("micro_avg f1-score: %.4f" % f1)
     model.train()
@@ -116,18 +116,22 @@ if __name__ == "__main__":
     micro_avg_score_y.append(score)
 
     for epoch in range(1, epochs+1):
+        avg_loss = 0.
         for i, batch in enumerate(train_loader):
             words_batch, tags_batch, leng = batch # torch.tensor
             words_batch = words_batch.to(device)
             tags_batch = tags_batch.to(device)
             leng = leng.to(device)
             loss = model(words_batch, leng, tags_batch)
+            avg_loss += loss.item()
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        
+        print("Epoch" , epoch)
+        print("Train Loss: ", avg_loss/len(train_dataset))
+
         if epoch % 5 == 0:
-            print("Epoch" , epoch)
+            
             epoch_record_x.append(epoch)
             score = eval(model, word_dict, tag_dict)
             micro_avg_score_y.append(score)
